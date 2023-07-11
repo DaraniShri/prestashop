@@ -1,0 +1,6 @@
+parent: classic
+name: my_child_theme
+display_name: Child theme creation in PrstaShop
+version: 1.0.0
+assets:
+  use_parent_assets: true
