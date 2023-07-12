@@ -25,6 +25,9 @@
 {block name='product_miniature_item'}
 <div class="js-product product{if !empty($productClasses)} {$productClasses}{/if}">
   <article class="product-miniature js-product-miniature" data-id-product="{$product.id_product}" data-id-product-attribute="{$product.id_product_attribute}">
+    
+    
+
     <div class="thumbnail-container">
       <div class="thumbnail-top">
         {block name='product_thumbnail'}
@@ -81,6 +84,24 @@
           {else}
             <h2 class="h3 product-title"><a href="{$product.url}" content="{$product.url}">{$product.reference|truncate:30:'...'}</a></h2>
           {/if}
+        {/block}
+
+        {block name='product_quantity'}
+          {if $page.page_name == 'index'}
+            <h3 class="h3 product-title"><a href="{$product.url}" content="{$product.url}">{$product.quantity|truncate:30:'...'}</a></h3>
+          {else}
+            <h2 class="h3 product-title"><a href="{$product.url}" content="{$product.url}">{$product.quantity|truncate:30:'...'}</a></h2>
+          {/if}
+        {/block}
+
+        {block name='product_miniature_item'}
+          <div class="product-availability">
+            {if $product.quantity > 0}
+                <span class="availability-list-in-stock">In Stock</span>
+            {else}
+                <span class="availability-list-out-of-stock">Out of Stock</span>
+            {/if}
+          </div>
         {/block}
 
         {block name='product_price_and_shipping'}

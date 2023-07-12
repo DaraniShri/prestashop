@@ -1,0 +1,19 @@
+.product-miniature .thumbnail-container {
+    border-radius: 20px;
+}
+.img-fluid,.carousel-inner>.carousel-item>img,.carousel-inner>.carousel-item>a>img {
+    border-radius: 50px;
+}
+details, figcaption, figure, footer, header, main, menu, nav, section, summary{
+    background-color: aquamarine;
+}
+.thumbnail-container .product-availability .availability-list-in-stock{
+    background-color: rgb(30, 238, 51);
+}
+.thumbnail-container .product-availability .availability-list-out-of-stock{
+    background-color: red;
+}
+
+.thumbnail-container .product-availability span{
+    font-weight: bold;
+}
