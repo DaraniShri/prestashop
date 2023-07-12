@@ -96,10 +96,8 @@
 
         {block name='product_miniature_item'}
           <div class="product-availability">
-            {if $product.quantity > 0}
-                <span class="availability-list-in-stock">In Stock</span>
-            {else}
-                <span class="availability-list-out-of-stock">Out of Stock</span>
+            {if $product.quantity < 5}
+                <span class="availability-list-in-stock">Hurry! only &$product_quantity left</span>
             {/if}
           </div>
         {/block}
