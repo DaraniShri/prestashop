@@ -94,11 +94,11 @@
           {/if}
         {/block}
 
+        
+
         {block name='product_miniature_item'}
           <div class="product-availability">
-            {if $product.quantity < 5}
-                <span class="availability-list-in-stock">Hurry! only &$product_quantity left</span>
-            {/if}
+          <h3 class="h3 product-title"><a href="{$product.url}" content="{$product.url}">{$product.product_quantity_update|truncate:30:'...'}</a></h3>
           </div>
         {/block}
 
