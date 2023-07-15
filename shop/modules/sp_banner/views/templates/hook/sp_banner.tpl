@@ -1,17 +1,17 @@
-<div id="slider-block-home">
-    <div id="block-1">
-        <img src="clothe1.jpg"></img>
+<div id="slider-block-home" class="multiple-items" >
+    <div id="block-1" class="block">
+        <img class="img-thumbnail" src="http://localhost/shop/modules/sp_banner/images/fashion1.jpg"></img>
     </div>
-    <div id="block-2">
-        <h2>hi</h2>
+    <div id="block-2" class="block">
+        <img class="img-thumbnail" src="http://localhost/shop/modules/sp_banner/images/fashion2.jpg"></img>
     </div>
-    <div id="block-3">
-        <h2>hi</h2>
+    <div id="block-3" class="block">
+        <img class="img-thumbnail" src="http://localhost/shop/modules/sp_banner/images/fashion3.jpg"></img>
     </div>
-    <div id="block-4">
-        <h2>hi</h2>
+    <div id="block-4" class="block">
+        <img class="img-thumbnail" src="http://localhost/shop/modules/sp_banner/images/fashion4.jpg"></img>
     </div>
-    <div id="block-5">
-        <h2>hi</h2>
+    <div id="block-5" class="block">
+        <img class="img-thumbnail" src="http://localhost/shop/modules/sp_banner/images/fashion2.jpg"></img>
     </div>
 </div>

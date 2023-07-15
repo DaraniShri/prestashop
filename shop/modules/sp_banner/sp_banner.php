@@ -44,9 +44,11 @@
             return $this->display(__FILE__, 'sp_banner.tpl');
         }
 
-        
         public function hookDisplayHeader(){
-            //return $this->display(__FILE__, 'sp_banner.tpl');
+            $this->context->controller->registerStylesheet('modules-homeslider', 'modules/' . $this->name . '/css/slick.css', ['media' => 'all', 'priority' => 150]);
+            $this->context->controller->registerJavascript('modules-slickslides', 'modules/' . $this->name . '/js/slick.min.js', ['position' => 'top', 'priority' => 150]);
+            $this->context->controller->registerStylesheet('custom-styles', 'modules/' . $this->name . '/css/custom.css', ['position' => 'top', 'priority' => 150]);
+            $this->context->controller->registerJavascript('modules-slider', 'modules/' . $this->name . '/js/custom.js', ['position' => 'top', 'priority' => 150]);
         }
     }
 ?>
