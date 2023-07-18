@@ -42,7 +42,9 @@
 
         public function getContent()
         {
+            $this->getDbContent();
             $output = '';
+            $changes = '';
             if (Tools::isSubmit('submit' . $this->name)) {
                 $configValue = (string) Tools::getValue('block-title');
 
@@ -54,10 +56,34 @@
                 }
             }
             if (Tools::isSubmit('insertion' . $this->name)) {
-                $modulename = (string) Tools::getValue('slider_name');
-                $title = (string) Tools::getValue('slider_name');
+                $slidername = (string) Tools::getValue('slider_name');
+                $link = (string) Tools::getValue('link');
+                $position = (int) Tools::getValue('position');
+                $status = (int) Tools::getValue('status');
+                $image = (string) Tools::getValue('image');
+                $uploadFile=$this->fileUpload($image);
+                $insertData = array(
+                    'name_slide' => $slidername,
+                    'link' => $link,
+                    'position' => $position,
+                    'active' => $status,
+                    'image' => $uploadFile,
+                );
+                $process = Db::getInstance()->insert('sp_banner', $insertData,false,true,Db::INSERT,false);
+                if($process){
+                    $changes = $this->displayConfirmation($this->l('Your settings have been saved'));     
+                }
+                else{
+                    $output = $this->displayError($this->l('There was a problem'));
+                }
             }
-            return $output . $this->displayForm() . $this->displayInsertForm();
+            return $output . $changes . $this->displayForm() . $this->displayInsertForm();
+        }
+
+        public function getDbContent(){
+            $db = \Db::getInstance();
+            $request="SELECT * FROM sp_banner";
+            $result=$db->executeS($request);
         }
 
         public function displayForm()
@@ -91,38 +117,77 @@
             return $helper->generateForm([$form]);
         }
 
+        /**
+         * @see Module::fileUpload()
+         * returns the uploaded file name
+         */
+
+        public function fileUpload($uploadFile){
+            $fileName=$_FILES['image']['name'];
+            $temp_file = $_FILES['image']['tmp_name'];
+            $image_path = dirname(__DIR__)."\sp_banner\images\\".$_FILES['image']['name'];
+            if (move_uploaded_file($temp_file, $image_path)) {
+                $output = $this->displayConfirmation($this->l(' File uploaded successfully'));
+                return $fileName;
+            } else {
+                $output = $this->displayError($this->l('Error in uploading file'));
+            }
+        }
+
         public function displayInsertForm(){
             $form=[
                 'form' =>[
+                    'legend' => [
+                        'title' => $this->l('Settings'),
+                    ],
                     'input' =>array(   
                         array(   
                             'type' => 'text',
                             'name' => 'slider_name',    
-                            'required' => true,    
+                            'required' => true,
+                            'label' =>'Slider name'    
                         ),    
                         array(    
                             'type'=>'text',    
-                            'name' => 'title',    
+                            'name' => 'link',    
                             'required' => true,    
-                            'label' =>'title'    
-                        ),  
+                            'label' =>'link',   
+                        ),
                         array(    
-                            'type'=>'radio',    
-                            'name' => 'status',    
+                            'type'=>'text',    
+                            'name' => 'position',    
                             'required' => true,    
-                            'label' =>'active'    
+                            'label' =>'Position',    
                         ), 
+                        array(
+                            'type' => 'radio',
+                            'label' => $this->l('Status'),
+                            'name' => 'status',
+                            'required'  => true,
+                            'values' => array(
+                                array(
+                                    'id' => 'active',
+                                    'value' => 1,
+                                    'label' => $this->l('active')
+                                ),
+                                array(
+                                    'id' => 'disable',
+                                    'value' => 0,
+                                    'label' => $this->l('disable')
+                                ),
+                            ),  
+                        ),
                         array(    
-                            'type'=>'radio',    
-                            'name' => 'status',    
+                            'type'=>'file',    
+                            'name' => 'image',    
                             'required' => true,    
-                            'label' =>'disable'    
-                        ),        
+                            'label' => $this->l('Image file'),
+                        ),
                     ),
                     'submit' =>[ 
                         'name' => 'insertion',   
-                        'title' => 'insert',
-                    ]    
+                        'title' => 'Insert',
+                    ],
                 ]
             ];
             $helperform = new HelperForm();
@@ -133,6 +198,11 @@
         }      
     
         public function hookDisplayHome(){
+            $this->context->smarty->assign(
+                [
+                    'sp_banner' => $this->getDbContent()
+                ]
+            );
             return $this->display(__FILE__, 'sp_banner.tpl');
         }
 
