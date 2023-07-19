@@ -1,18 +1,13 @@
-
-<div id="slider-block-home" class="multiple-items" >
-    <div id="block-1" class="block">
-        <img class="img-thumbnail" src="http://localhost/shop/modules/sp_banner/images/fashion3.jpg"></img>
-    </div>
-    <div id="block-2" class="block">
-        <img class="img-thumbnail" src="http://localhost/shop/modules/sp_banner/images/fashion2.jpg"></img>
-    </div>
-    <div id="block-3" class="block">
-        <img class="img-thumbnail" src="http://localhost/shop/modules/sp_banner/images/fashion3.jpg"></img>
-    </div>
-    <div id="block-4" class="block">
-        <img class="img-thumbnail" src="http://localhost/shop/modules/sp_banner/images/fashion3.jpg"></img>
-    </div>
-    <div id="block-5" class="block">
-        <img class="img-thumbnail" src="http://localhost/shop/modules/sp_banner/images/fashion2.jpg"></img>
-    </div>
+<div class="featured-products clearfix">
+    <h2 class="products-section-title text-uppercase">{$sp_title}</h2>
+</div>
+<div class="multiple-items">
+    {foreach $sp_banner as $slider}
+        <div class="block">
+            <a href="{$slider['link']}"><img class="img-thumbnail" src="/shop/modules/sp_banner/images/{$slider['image']}"/></a>
+            <div class="description">
+                <span>{$slider['name_slide']}</span>
+            </div>
+        </div>
+    {/foreach}
 </div>

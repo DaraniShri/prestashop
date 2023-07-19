@@ -17,7 +17,6 @@
             $this->displayName = $this->l('Custom Module');
             $this->description = $this->l('Creating a banner in the home page.');
             $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
-
         }
 
         /**
@@ -42,12 +41,12 @@
 
         public function getContent()
         {
-            $this->getDbContent();
+            $rowId=$_GET['slide_id'];
+            var_dump($rowId);
+            $this->getDbContent();//select the row from table
             $output = '';
-            $changes = '';
             if (Tools::isSubmit('submit' . $this->name)) {
                 $configValue = (string) Tools::getValue('block-title');
-
                 if (empty($configValue)){
                     $output = $this->displayError($this->l('Invalid Configuration value'));
                 } else {
@@ -77,13 +76,14 @@
                     $output = $this->displayError($this->l('There was a problem'));
                 }
             }
-            return $output . $changes . $this->displayForm() . $this->displayInsertForm();
+            return $output . $changes . $this->displayForm() . $this->displayInsertForm("update") . $this->viewDb();
         }
 
         public function getDbContent(){
             $db = \Db::getInstance();
-            $request="SELECT * FROM sp_banner";
+            $request="SELECT * FROM sp_banner  WHERE active='1';";
             $result=$db->executeS($request);
+            return $result;
         }
 
         public function displayForm()
@@ -134,18 +134,24 @@
             }
         }
 
-        public function displayInsertForm(){
+        public function displayInsertForm($action){
             $form=[
                 'form' =>[
                     'legend' => [
                         'title' => $this->l('Settings'),
                     ],
-                    'input' =>array(   
+                    'input' =>array( 
+                        array(   
+                            'type' => 'text',
+                            'name' => $action,    
+                            'hidden' => true,
+                        ),   
                         array(   
                             'type' => 'text',
                             'name' => 'slider_name',    
                             'required' => true,
-                            'label' =>'Slider name'    
+                            'label' =>'Slider name',
+                            'value' =>    
                         ),    
                         array(    
                             'type'=>'text',    
@@ -195,12 +201,13 @@
             $helperform->name_controller = $this->name;    
             $helperform->submit_action = 'insertion' . $this->name;    
             return $helperform->generateForm([$form]);    
-        }      
-    
+        }   
+
         public function hookDisplayHome(){
             $this->context->smarty->assign(
                 [
-                    'sp_banner' => $this->getDbContent()
+                    'sp_banner' => $this->getDbContent(),
+                    'sp_title' =>Configuration::get("update-value")
                 ]
             );
             return $this->display(__FILE__, 'sp_banner.tpl');
@@ -211,6 +218,21 @@
             $this->context->controller->registerJavascript('modules-slick-js', 'modules/' . $this->name . '/js/slick.min.js', ['position' => 'top', 'priority' => 150]);
             $this->context->controller->registerStylesheet('custom-styles', 'modules/' . $this->name . '/css/custom.css', ['position' => 'top', 'priority' => 150]);
             $this->context->controller->registerJavascript('modules-slider', 'modules/' . $this->name . '/js/custom.js', ['position' => 'top', 'priority' => 150]);
+        }
+
+        public function viewDb(){
+            $this->context->smarty->assign(
+                [
+                    'sp_table' => $this->getDbContent(),
+                    'link' => $this->context->link
+                ]
+            );
+            return $this->display(__FILE__, 'tableContent.tpl');
+        }
+
+        public function updateRecord($slide_id){
+            $selectQuery="SELECT * FROM sp_banner WHERE id_slide=$slide_id";
+            
         }
     }
 ?>
