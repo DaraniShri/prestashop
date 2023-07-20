@@ -42,7 +42,7 @@
         public function getContent()
         {
             $rowId=$_GET['slide_id'];
-            var_dump($rowId);
+            $deleteId=$_GET['slides_id'];
             $this->getDbContent();//select the row from table
             $output = '';
             if (Tools::isSubmit('submit' . $this->name)) {
@@ -60,7 +60,9 @@
                 $position = (int) Tools::getValue('position');
                 $status = (int) Tools::getValue('status');
                 $image = (string) Tools::getValue('image');
-                $uploadFile=$this->fileUpload($image);
+                $fileName=$_FILES['image']['name'];
+                $temp_file = $_FILES['image']['tmp_name'];
+                $uploadFile=$this->fileUpload($fileName, $temp_file);
                 $insertData = array(
                     'name_slide' => $slidername,
                     'link' => $link,
@@ -76,7 +78,38 @@
                     $output = $this->displayError($this->l('There was a problem'));
                 }
             }
-            return $output . $changes . $this->displayForm() . $this->displayInsertForm("update") . $this->viewDb();
+            if($rowId){
+                $output.= $this->updateRecord($rowId);
+            }
+            if($deleteId){
+                $this->deleteRecord($deleteId);
+            }
+            if (Tools::isSubmit('updation' . $this->name)) {
+                $id = (int) Tools::getValue('id');
+                $slidername = (string) Tools::getValue('slider_name');
+                $link = (string) Tools::getValue('link');
+                $position = (int) Tools::getValue('position');
+                $status = (int) Tools::getValue('status');
+                $image = (string) Tools::getValue('images');
+                $fileName=$_FILES['images']['name'];
+                $temp_file = $_FILES['images']['tmp_name'];
+                $uploadFile=$this->fileUpload($fileName,$temp_file);
+                $updateData = array(
+                    'name_slide' => $slidername,
+                    'link' => $link,
+                    'position' => $position,
+                    'active' => $status,
+                    'image' => $uploadFile,
+                );
+                $action = Db::getInstance()->update('sp_banner', $updateData,"id_slide=$id",0,false,true,false);
+                if($action){
+                    $changes = $this->displayConfirmation($this->l('Your settings have been saved'));     
+                }
+                
+            }
+            return $output . $changes . $this->displayForm() . $this->displayInsertForm() . $this->viewDb();
+            
+            
         }
 
         public function getDbContent(){
@@ -122,10 +155,9 @@
          * returns the uploaded file name
          */
 
-        public function fileUpload($uploadFile){
-            $fileName=$_FILES['image']['name'];
-            $temp_file = $_FILES['image']['tmp_name'];
-            $image_path = dirname(__DIR__)."\sp_banner\images\\".$_FILES['image']['name'];
+        public function fileUpload($fileName,$temp_file){
+
+            $image_path = dirname(__DIR__)."\sp_banner\images\\".$fileName;
             if (move_uploaded_file($temp_file, $image_path)) {
                 $output = $this->displayConfirmation($this->l(' File uploaded successfully'));
                 return $fileName;
@@ -134,24 +166,18 @@
             }
         }
 
-        public function displayInsertForm($action){
+        public function displayInsertForm(){
             $form=[
                 'form' =>[
                     'legend' => [
                         'title' => $this->l('Settings'),
                     ],
-                    'input' =>array( 
-                        array(   
-                            'type' => 'text',
-                            'name' => $action,    
-                            'hidden' => true,
-                        ),   
+                    'input' =>array(    
                         array(   
                             'type' => 'text',
                             'name' => 'slider_name',    
                             'required' => true,
                             'label' =>'Slider name',
-                            'value' =>    
                         ),    
                         array(    
                             'type'=>'text',    
@@ -231,8 +257,89 @@
         }
 
         public function updateRecord($slide_id){
-            $selectQuery="SELECT * FROM sp_banner WHERE id_slide=$slide_id";
+            $conn = \Db::getInstance();
+            $selectQuery="SELECT * FROM sp_banner WHERE id_slide=$slide_id;";
+            $result=$conn->getRow($selectQuery);
+            $form=[
+                'form' =>[
+                    'legend' => [
+                        'title' => $this->l('Settings'),
+                    ],
+                    'input' =>array( 
+                        array(   
+                            'type' => 'hidden',
+                            'name' => 'id', 
+                            'value' => $result[0]['id_slide'], 
+                        ),   
+                        array(   
+                            'type' => 'text',
+                            'name' => 'slider_name',    
+                            'value' => $result[0]['name_slude'], 
+                            'label' =>'Slider name',
+                        ),    
+                        array(    
+                            'type'=>'text',    
+                            'name' => 'link',    
+                            'label' =>'link', 
+                            'value' => $result[0]['link'],   
+                        ),
+                        array(    
+                            'type'=>'text',    
+                            'name' => 'position',    
+                            'label' =>'Position',  
+                            'value' => $result[0]['position'], 
+  
+                        ), 
+                        array(
+                            'type' => 'radio',
+                            'label' => $this->l('Status'),
+                            'name' => 'status',
+                            'values' => array(
+                                array(
+                                    'id' => 'active',
+                                    'value' => 1,
+                                    'label' => $this->l('active')
+                                ),
+                                array(
+                                    'id' => 'disable',
+                                    'value' => 0,
+                                    'label' => $this->l('disable')
+                                ),
+                            ),  
+                        ),
+                        array(    
+                            'type'=>'file',    
+                            'name' => 'images',    
+                            'label' => $this->l('Image file'),
+                            'value' => $result[0]['image'],   
+
+                        ),
+                    ),
+                    'submit' =>[ 
+                        'name' => 'updation',   
+                        'title' => 'Update',
+                    ],
+                ]
+            ];
+            $helperupdateform = new HelperForm();
+            $helperupdateform->table = $this->table;    
+            $helperupdateform->name_controller = $this->name;    
+            $helperupdateform->submit_action = 'updation' . $this->name;    
+            $helperupdateform->fields_value['id'] =$result['id_slide'];
+            $helperupdateform->fields_value['slider_name'] = $result['name_slide'];
+            $helperupdateform->fields_value['position'] = $result['position'] ;
+            $helperupdateform->fields_value['status'] = $result['active'] ;     
+            $helperupdateform->fields_value['link'] = $result['link'] ;    
+            return $helperupdateform->generateForm([$form]);
             
+        }
+
+        public function deleteRecord($slide_id){
+            $conn = \Db::getInstance();
+            $selectQuery="SELECT * FROM sp_banner WHERE id_slide=$slide_id;";
+            $result=$conn->executeS($selectQuery);
+            var_dump($selectQuery);
+            $deleteQuery=$conn->delete('sp_banner',"id_slide=$slide_id",0,true,false);
         }
     }
 ?>
