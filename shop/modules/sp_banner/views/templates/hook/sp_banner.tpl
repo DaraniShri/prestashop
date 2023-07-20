@@ -4,7 +4,7 @@
 <div class="multiple-items">
     {foreach $sp_banner as $slider}
         <div class="block">
-            <a href="{$slider['link']}"><img class="img-thumbnail" src="/shop/modules/sp_banner/images/{$slider['image']}"/></a>
+            <a href="{$slider['link']}"><img class="img-thumbnail" id="custom-products" src="/shop/modules/sp_banner/images/{$slider['image']}"/></a>
             <div class="description">
                 <span>{$slider['name_slide']}</span>
             </div>

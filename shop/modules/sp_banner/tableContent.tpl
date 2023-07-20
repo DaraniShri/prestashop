@@ -21,8 +21,8 @@
                 <td>{$rows['active']}</td>
                 <td>{$rows['position']}</td>  
                 <td>
-                    <a class="btn btn-default" id="updateData" href="{$link->getAdminLink('AdminModules')}&configure=sp_banner&slide_id={$rows.id_slide}">Update</a>
-                    <a class="btn btn-danger" id="deleteData" href="#?id={$rows['id_slide']}">Delete</a>
+                    <a class="btn btn-primary" id="updateData" href="{$link->getAdminLink('AdminModules')}&configure=sp_banner&slide_id={$rows.id_slide}">Edit</a>
+                    <a class="btn btn-danger" id="deleteData" href="{$link->getAdminLink('AdminModules')}&configure=sp_banner&slides_id={$rows.id_slide}">Delete</a>
                 </td>  
             </tr>    
         {/foreach}
