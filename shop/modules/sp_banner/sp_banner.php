@@ -338,7 +338,6 @@
             $conn = \Db::getInstance();
             $selectQuery="SELECT * FROM sp_banner WHERE id_slide=$slide_id;";
             $result=$conn->executeS($selectQuery);
-            var_dump($selectQuery);
             $deleteQuery=$conn->delete('sp_banner',"id_slide=$slide_id",0,true,false);
         }
     }
