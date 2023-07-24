@@ -1,7 +1,17 @@
-var selectedValues= new Array();
-$('#products').select2('val', ["value1", "value2", "value3"]);
-selectedValues.push("value1");
-selectedValues.push("value2");
-selectedValues.push("value3");
-$("#products[]").selectedValues(Values).trigger('change');
+$(function(){
+    var data=$("#products option:selected").text();
+    $('#products').select2({
+        placeholder: "Search a product",
+        multiple:true,
+        ajax: {
+            type:'POST',
+            url: '/shop/modules/sp_featured_products/ajax_call.php?term='+data+'&_type=query&q='+data+'',
+        }
+    });
+    alert(data);
 
+    $('#products').on('change', function() {
+        var data = $("#products option:selected").text();
+        $("#products").val(data);
+    })
+});

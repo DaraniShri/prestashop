@@ -17,6 +17,7 @@
             $this->displayName = $this->l('Featured Products');
             $this->description = $this->l('Featured Products of the store.');
             $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
+            $this->registerHook('displayBackOfficeHeader');
         }
 
         /**
@@ -27,8 +28,7 @@
             return (
                     parent::install()
                     && $this->registerHook('displayHome')
-                    && $this->registerHook('displayHeader') 
-                    && $this->registerHook('displayNewAdmin') 
+                    && $this->registerHook('displayBackOfficeHeader') 
                 ); 
         }
 
@@ -44,23 +44,18 @@
             return $this->display(__FILE__, 'sp_featured_products.tpl');
         }
 
-        public function hookDisplayHeader(){
-            
-        }
-
-        public function hookDisplayNewAdmin(){
-            $this->context->controller->registerStylesheet('select2-styles', 'modules/' . $this->name . '/css/select2.css', ['media' => 'all', 'priority' => 150]);
-            $this->context->controller->registerJavascript('select2-script', 'modules/' . $this->name . '/js/select2.min.js', ['position' => 'top', 'priority' => 150]);
-            $this->context->controller->registerJavascript('select2-custom-script', 'modules/' . $this->name . '/js/custom_select.js', ['position' => 'top', 'priority' => 150]);
-        }
-
         public function getContent(){
+
+            $this->context->controller->addCSS(($this->_path) . 'css/select2.min.css', 'all');
+            $this->context->controller->addJS(($this->_path) . 'js/select2.min.js', 'all');
+            $this->context->controller->addJS(($this->_path) . 'js/custom_select.js', 'all');
+   
             return $this->selectProduct();
         }
 
         public function getDbContent(){
             $db = \Db::getInstance();
-            $request="SELECT ps_product_lang.id_product,ps_product_lang.name FROM ps_product_lang LEFT JOIN ps_product ON ps_product.id_product=ps_product_lang.id_product WHERE id_lang='1';";
+            $request="SELECT ps_product_lang.id_product,ps_product_lang.name FROM ps_product_lang LEFT JOIN ps_product ON ps_product.id_product=ps_product_lang.id_product WHERE id_lang='1' and name like '%%demo';";
             $result=$db->executeS($request);
             return $result;
         }
