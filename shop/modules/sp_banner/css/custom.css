@@ -3,12 +3,8 @@
     height: 100%;
 }
 .block{
-    width: 200px;
-    height: 200px;
-}
-.image-block{
     width: 100%;
-    height: 100%;
+    height: auto;
 }
 #custom-products{
     width: 100%;
