@@ -48,7 +48,10 @@
 
             $this->context->controller->addCSS(($this->_path) . 'css/select2.min.css', 'all');
             $this->context->controller->addJS(($this->_path) . 'js/select2.min.js', 'all');
+            $this->context->controller->addJS(($this->_path) . 'js/html5sortable.min.js', 'all');
+            $this->context->controller->addJS(($this->_path) . 'js/select2.sortable.min.js', 'all');
             $this->context->controller->addJS(($this->_path) . 'js/custom_select.js', 'all');
+
    
             return $this->selectProduct();
         }
@@ -66,8 +69,7 @@
                     'dbData' => $this->getDbContent()
                 ]
             );           
-            return $this->display(__FILE__, 'selectProduct.tpl');
-                     
+            return $this->display(__FILE__, 'selectProduct.tpl');    
         }
 
                
