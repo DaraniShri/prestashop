@@ -1,17 +1,17 @@
-$(function(){
-    var data=$("#products option:selected").text();
-    $('#products').select2({
-        placeholder: "Search a product",
-        multiple:true,
+$(document).ready(function () {
+    var productDataUrl = '/shop/modules/sp_featured_products/ajax_call.php?';
+    $(".products").select2({
+        multiple: true,
         ajax: {
-            type:'POST',
-            url: '/shop/modules/sp_featured_products/ajax_call.php?term='+data+'&_type=query&q='+data+'',
-        }
+            url: productDataUrl,
+            dataType: 'json',
+            processResults: function (response) {
+                console.log(response);
+                return {
+                    results: response
+                }
+            }
+        },
     });
-    alert(data);
-
-    $('#products').on('change', function() {
-        var data = $("#products option:selected").text();
-        $("#products").val(data);
-    })
+    jQuery(".products").trigger('change');
 });
