@@ -81,7 +81,6 @@
                         echo $imagePath;
                     }                  
                 }
-                die();
             }
             return $this->selectProduct();
         }
