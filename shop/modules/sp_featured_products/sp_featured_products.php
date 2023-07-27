@@ -60,20 +60,44 @@
                 $productArray=json_encode($productId);
                 Configuration::updateValue('update_product',$productArray);
                 $output=$this->displayConfirmation($this->l('Settings updated'));
+                $lang_id = (int) Configuration::get('PS_LANG_DEFAULT');
                 $productIdList=json_decode($productArray);
                 var_dump($productIdList);
-                $lang_id = (int) Configuration::get('PS_LANG_DEFAULT');
                 foreach($productIdList as $productIds){
-                    $product = new Product($productIds, false, $lang_id);                    
-                    if (Validate::isLoadedObject($product)) {
-                        echo $product->name;
-                        echo $product->description;
-                        echo $product->description_short;
-                    }
+                    $product=new Product($productIds,false,$lang_id);
+                    var_dump($product->id);
+                    var_dump($product->name);
+                    var_dump($product->reference);
+                    var_dump($product->description);
+                    var_dump($product->id_default_image);
+                    var_dump($product);
+                    //$template=$this->getProductData($product); 
+                    $productImages = $product->getImages((int) $id_lang);
+                    if ($productImages && count($productImages) > 0) {
+                    $link = new Link;
+                    foreach ($productImages AS $key => $val) {
+                        $id_image = $val['id_image'];
+                        $imagePath = $link->getImageLink($product->link_rewrite[Context::getContext()->language->id], $id_image, 'home_default');
+                        echo $imagePath;
+                    }                  
                 }
                 die();
             }
-            return $this->selectProduct() . $output;
+            return $this->selectProduct();
+        }
+
+        /*public function getProductData(){
+            $assembler = new ProductAssembler($this->context);
+
+            $presenterFactory = new ProductPresenterFactory($this->context);
+            $presentationSettings = $presenterFactory->getPresentationSettings();
+            $presenter = $presenterFactory->getPresenter();
+
+            return $presenter->present(
+                $presentationSettings,
+                $assembler->assembleProduct($product),
+                $this->context->language
+            );*/
         }
 
         public function selectProduct(){
