@@ -1,4 +1,6 @@
 <?php
+    use PhpOffice\PhpSpreadsheet\Spreadsheet; 
+    use PhpOffice\PhpSpreadsheet\Writer\Csv; 
 
     if (!defined('_PS_VERSION_')) {
         exit;
@@ -48,16 +50,34 @@
         }
 
         public function getProductDataArray(){
-            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet(); 
-            $header=["reference","description long","description short","category","img","brand",];
-
             $products = $this->getProducts();
             $lang_id = (int) Configuration::get('PS_LANG_DEFAULT');
+            $dataProduct[]=[
+                "reference"=>"REFERENCE",
+                "brand"=>"MARQUE",
+                "bar code"=>"CODE BARRE",
+                "name"=>"NOM",
+                "decription long"=>"DESCRIPTION COURTE",
+                "description short"=>"DESCRIPTION LONGUE",
+                "price"=>"PRIX HT",
+                "category"=>"CATEGORY",
+                "quantity"=>"QTY",
+                "img"=>"IMG",
+                "weight"=>"WEIGHT",
+                "active"=>"INVISIBLE"
+            ]; 
             foreach($products as $product_id){
                 $product=new Product($product_id['id_product'],false,$lang_id);
                 $pName = $product->name;
                 $pReference = $product->reference;
+                $barcode = $product->ean13;
+                $weight = $product->weight;
+                $price = $product->price;
+                $status = $product->active;
+                $price=Product::getPriceStatic($product_id['id_product']);
+                $quantity=StockAvailable::getQuantityAvailableByProduct($product_id['id_product']);
                 $pdescription = $product->description;
                 $pshort_description = $product->description_short;
                 $pCategory = $product->category;
@@ -69,28 +89,28 @@
                         $imagePath = $link->getImageLink($product->link_rewrite[Context::getContext()->language->id], $id_image, 'home_default');
                     }
                 } 
-                //echo $product->quantity."hello";
                 $id_manufacturer=$product->id_manufacturer;
                 $manufacturer=new Manufacturer($id_manufacturer,$id_lang);
                 $mName = $manufacturer->name;
-                echo "<br>";
-                $price=Product::getPriceStatic($product_id['id_product']);
-
-                $dataProduct[]=["reference"=>$pReference,
-                              "decription long"=>$pdescription,
-                              "description short"=>$pshort_description,
-                              "category"=>$pCategory,
-                              "img"=>$imagePath,
-                              "brand"=>$mName];  
+                $dataProduct[]=[
+                    "reference"=>$pReference,
+                    "brand"=>$mName,
+                    "bar code"=>$barcode,
+                    "name"=>$pName,
+                    "decription long"=>$pdescription,
+                    "description short"=>$pshort_description,
+                    "price"=>$price,
+                    "category"=>$pCategory,
+                    "quantity"=>$quantity,
+                    "img"=>$imagePath,
+                    "weight"=>$weight,
+                    "active"=>$status
+                ];  
             }
-            var_dump($dataProduct);                           
             $sheet->fromArray($dataProduct);
-            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Csv($spreadsheet);
-            $fileName=$writer->save(dirname(__DIR__)."\sb_export_product\csv\product.csv");
-            die();
-
-
-            
+            $writer = new Csv($spreadsheet);
+            $writer->setDelimiter(';');
+            $fileName=$writer->save(dirname(__DIR__)."\sb_export_product\csv\product.csv");           
         }
 
         public function HookDisplayHome(){
@@ -108,7 +128,7 @@
 
         public function getProducts(){
             $db = \Db::getInstance();
-            $request="SELECT id_product FROM ps_product WHERE active='1';";
+            $request="SELECT id_product FROM ps_product;";
             $result=$db->executeS($request);
             return $result;
         }
