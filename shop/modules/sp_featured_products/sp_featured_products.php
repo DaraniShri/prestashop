@@ -66,7 +66,7 @@
             $this->context->controller->addJS(($this->_path) . 'js/custom_select.js', 'all');
             
             if(Tools::getValue('submit')){
-                var_dump($this->getDataArray());
+                $this->getDataArray();
             }
             return $this->selectProduct();
         }
@@ -77,25 +77,16 @@
             Configuration::updateValue('update_product',$productArray);
             $lang_id = (int) Configuration::get('PS_LANG_DEFAULT');
             $productIdList=json_decode($productArray);
-            var_dump($productIdList);
             foreach($productIdList as $productIds){
                 $product=new Product($productIds,false,$lang_id);
                 $pId=$product->id;
                 $pName=$product->name;
-                //$template=$this->getProductData($product); 
                 $productImages = $product->getImages((int) $id_lang);
                 if ($productImages && count($productImages) > 0) {
                     $link = new Link;
                     foreach ($productImages AS $key => $val) {
                         $id_image = $val['id_image'];
                         $imagePath = $link->getImageLink($product->link_rewrite[Context::getContext()->language->id], $id_image, 'home_default');
-<<<<<<< Updated upstream
-                        echo $imagePath;
-                    }                  
-                }
-            }
-            return $this->selectProduct();
-=======
                     }
                 }  
                 $productData[]=[
@@ -104,25 +95,8 @@
                     "path"=>$imagePath
                 ];    
             } 
-            var_dump($productData);           
             return $productData;            
->>>>>>> Stashed changes
-        }
-
-        /*public function getProductData(){
-            $assembler = new ProductAssembler($this->context);
-
-            $presenterFactory = new ProductPresenterFactory($this->context);
-            $presentationSettings = $presenterFactory->getPresentationSettings();
-            $presenter = $presenterFactory->getPresenter();
-
-            return $presenter->present(
-                $presentationSettings,
-                $assembler->assembleProduct($product),
-                $this->context->language
-            );
-        }*/
-        
+        }        
 
         public function selectProduct(){
             $this->context->smarty->assign(
