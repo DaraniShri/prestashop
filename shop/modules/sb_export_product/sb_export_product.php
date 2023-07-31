@@ -1,4 +1,6 @@
 <?php
+    require_once 'vendor/autoload.php';  
+
     use PhpOffice\PhpSpreadsheet\Spreadsheet; 
     use PhpOffice\PhpSpreadsheet\Writer\Csv; 
 
@@ -46,7 +48,6 @@
                 $this->getProductDataArray();  
             }
             return $this->getAdminProduct();
-
         }
 
         public function getProductDataArray(){
@@ -81,7 +82,7 @@
                 $pdescription = $product->description;
                 $pshort_description = $product->description_short;
                 $pCategory = $product->category;
-                $productImages = $product->getImages((int) $id_lang);
+                $productImages = $product->getImages((int) $lang_id);
                 if ($productImages && count($productImages) > 0) {
                     $link = new Link;
                     foreach ($productImages AS $key => $val) {
@@ -90,7 +91,7 @@
                     }
                 } 
                 $id_manufacturer=$product->id_manufacturer;
-                $manufacturer=new Manufacturer($id_manufacturer,$id_lang);
+                $manufacturer=new Manufacturer($id_manufacturer,$lang_id);
                 $mName = $manufacturer->name;
                 $dataProduct[]=[
                     "reference"=>$pReference,
@@ -110,11 +111,10 @@
             $sheet->fromArray($dataProduct);
             $writer = new Csv($spreadsheet);
             $writer->setDelimiter(';');
-            $fileName=$writer->save(dirname(__DIR__)."\sb_export_product\csv\product.csv");           
+            $writer->save(dirname(__DIR__)."\sb_export_product\csv\product.csv");           
         }
 
         public function HookDisplayHome(){
-            return $this->display(__FILE__, 'sb_export_product.tpl');
         }
 
         public function getAdminProduct(){
