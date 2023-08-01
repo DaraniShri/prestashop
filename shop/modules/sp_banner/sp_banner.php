@@ -74,7 +74,7 @@
                 if (empty($image)){
                     $warningMessage.= $this->displayError($this->l('Attach image file'));
                 }
-                else{
+                else{                 
                     $fileName=$_FILES['image']['name'];
                     $temp_file = $_FILES['image']['tmp_name'];
                     $uploadFile=$this->fileUpload($fileName, $temp_file);
@@ -146,7 +146,7 @@
                 }
                 
             }
-            return $warningMessage . $changes . $this->displayForm() . $this->displayInsertForm() . $this->viewDb();            
+            return $warningMessage . $changes . $this->displayForm() . $this->displayInsertForm() . $this->viewDb();                       
         }
 
         public function getDbContent(){
