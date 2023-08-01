@@ -43,26 +43,42 @@
         {
             $rowId=$_GET['slide_id'];
             $deleteId=$_GET['slides_id'];
-            $this->getDbContent();//select the row from table
-            $output = '';
+            $warningMessage = '';
             if (Tools::isSubmit('submit' . $this->name)) {
                 $configValue = (string) Tools::getValue('block-title');
                 if (empty($configValue)){
-                    $output = $this->displayError($this->l('Invalid Configuration value'));
+                    $warningMessage.= $this->displayError($this->l('Invalid Configuration value'));
                 } else {
-                    Configuration::updateValue('update-value', $configValue);
-                    $output = $this->displayConfirmation($this->l('Settings updated'));
+                    Configuration::updateValue('update_value', $configValue);
+                    $warningMessage.= $this->displayConfirmation($this->l('Settings updated'));
                 }
             }
             if (Tools::isSubmit('insertion' . $this->name)) {
                 $slidername = (string) Tools::getValue('slider_name');
+                if (empty($slidername)){
+                    $warningMessage.= $this->displayError($this->l('Enter slider name'));
+                }
                 $link = (string) Tools::getValue('link');
+                if (empty($link)){
+                    $warningMessage.= $this->displayError($this->l('Enter the link'));
+                }
                 $position = (int) Tools::getValue('position');
+                if (empty($position)){
+                    $warningMessage.= $this->displayError($this->l('Enter position'));
+                }
                 $status = (int) Tools::getValue('status');
+                if (empty($status)){
+                    $warningMessage.= $this->displayError($this->l('Enter the status'));
+                }
                 $image = (string) Tools::getValue('image');
-                $fileName=$_FILES['image']['name'];
-                $temp_file = $_FILES['image']['tmp_name'];
-                $uploadFile=$this->fileUpload($fileName, $temp_file);
+                if (empty($image)){
+                    $warningMessage.= $this->displayError($this->l('Attach image file'));
+                }
+                else{
+                    $fileName=$_FILES['image']['name'];
+                    $temp_file = $_FILES['image']['tmp_name'];
+                    $uploadFile=$this->fileUpload($fileName, $temp_file);
+                }
                 $insertData = array(
                     'name_slide' => $slidername,
                     'link' => $link,
@@ -72,28 +88,48 @@
                 );
                 $process = Db::getInstance()->insert('sp_banner', $insertData,false,true,Db::INSERT,false);
                 if($process){
-                    $changes = $this->displayConfirmation($this->l('Your settings have been saved'));     
+                    $changes.= $this->displayConfirmation($this->l('Your settings have been saved'));     
                 }
                 else{
-                    $output = $this->displayError($this->l('There was a problem'));
+                    $warningMessage.= $this->displayError($this->l('There was a problem'));
                 }
             }
             if($rowId){
-                $output.= $this->updateRecord($rowId);
+                $warningMessage.= $this->updateRecord($rowId);
             }
             if($deleteId){
                 $this->deleteRecord($deleteId);
             }
             if (Tools::isSubmit('updation' . $this->name)) {
                 $id = (int) Tools::getValue('id');
+                if (empty($id)){
+                    $warningMessage.= $this->displayError($this->l('Enter the ID'));
+                }
                 $slidername = (string) Tools::getValue('slider_name');
+                if (empty($slidername)){
+                    $warningMessage.= $this->displayError($this->l('Enter Slider name'));
+                }
                 $link = (string) Tools::getValue('link');
+                if (empty($link)){
+                    $warningMessage.= $this->displayError($this->l('Enter link'));
+                }
                 $position = (int) Tools::getValue('position');
+                if (empty($position)){
+                    $warningMessage.= $this->displayError($this->l('Enter position'));
+                }
                 $status = (int) Tools::getValue('status');
+                if (empty($status)){
+                    $warningMessage.= $this->displayError($this->l('Enter status'));
+                }
                 $image = (string) Tools::getValue('images');
-                $fileName=$_FILES['images']['name'];
-                $temp_file = $_FILES['images']['tmp_name'];
-                $uploadFile=$this->fileUpload($fileName,$temp_file);
+                if (empty($image)){
+                    $warningMessage.= $this->displayError($this->l('Enter status'));
+                }
+                else{
+                    $fileName=$_FILES['images']['name'];
+                    $temp_file = $_FILES['images']['tmp_name'];
+                    $uploadFile=$this->fileUpload($fileName,$temp_file);
+                }               
                 $updateData = array(
                     'name_slide' => $slidername,
                     'link' => $link,
@@ -102,14 +138,15 @@
                     'image' => $uploadFile,
                 );
                 $action = Db::getInstance()->update('sp_banner', $updateData,"id_slide=$id",0,false,true,false);
-                if($action){
-                    $changes = $this->displayConfirmation($this->l('Your settings have been saved'));     
+                if(empty($action)){
+                    $warningMessage.= $this->displayError($this->l('No update query'));
+                }
+                else{
+                    $changes.= $this->displayConfirmation($this->l('Your settings have been saved'));     
                 }
                 
             }
-            return $output . $changes . $this->displayForm() . $this->displayInsertForm() . $this->viewDb();
-            
-            
+            return $warningMessage . $changes . $this->displayForm() . $this->displayInsertForm() . $this->viewDb();            
         }
 
         public function getDbContent(){
@@ -146,7 +183,7 @@
             $helper->table = $this->table;
             $helper->name_controller = $this->name;
             $helper->submit_action = 'submit' . $this->name;
-            $helper->fields_value['slidename'] = Configuration::get('update-value');
+            $helper->fields_value['block-title'] = Configuration::get('update_value');
             return $helper->generateForm([$form]);
         }
 
@@ -157,12 +194,12 @@
 
         public function fileUpload($fileName,$temp_file){
 
-            $image_path = dirname(__DIR__)."\sp_banner\images\\".$fileName;
+            $image_path = dirname(__DIR__) . "\sp_banner\images\\" . $fileName;
             if (move_uploaded_file($temp_file, $image_path)) {
-                $output = $this->displayConfirmation($this->l(' File uploaded successfully'));
+                $warningMessage.= $this->displayConfirmation($this->l(' File uploaded successfully'));
                 return $fileName;
             } else {
-                $output = $this->displayError($this->l('Error in uploading file'));
+                $warningMessage.= $this->displayError($this->l('Error in uploading file'));
             }
         }
 
@@ -233,17 +270,17 @@
             $this->context->smarty->assign(
                 [
                     'sp_banner' => $this->getDbContent(),
-                    'sp_title' =>Configuration::get("update-value")
+                    'sp_title' =>Configuration::get("update_value")
                 ]
             );
             return $this->display(__FILE__, 'sp_banner.tpl');
         }
 
         public function hookDisplayHeader(){
-            $this->context->controller->registerStylesheet('modules-homeslider', 'modules/' . $this->name . '/css/slick.css', ['media' => 'all', 'priority' => 150]);
-            $this->context->controller->registerJavascript('modules-slick-js', 'modules/' . $this->name . '/js/slick.min.js', ['position' => 'top', 'priority' => 150]);
-            $this->context->controller->registerStylesheet('custom-styles', 'modules/' . $this->name . '/css/custom.css', ['position' => 'top', 'priority' => 150]);
-            $this->context->controller->registerJavascript('modules-slider', 'modules/' . $this->name . '/js/custom.js', ['position' => 'top', 'priority' => 150]);
+            $this->context->controller->registerStylesheet('slider-custom-styles', 'modules/' . $this->name . '/css/slick.css', ['media' => 'all', 'priority' => 150]);
+            $this->context->controller->registerJavascript('modules-slick-js-banner', 'modules/' . $this->name . '/js/slick.min.js', ['position' => 'top', 'priority' => 150]);
+            $this->context->controller->registerStylesheet('custom-styles-banner', 'modules/' . $this->name . '/css/custom.css', ['position' => 'top', 'priority' => 150]);
+            $this->context->controller->registerJavascript('modules-slider-banner', 'modules/' . $this->name . '/js/custom.js', ['position' => 'top', 'priority' => 150]);
         }
 
         public function viewDb(){
