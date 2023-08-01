@@ -43,47 +43,38 @@
         {
             $rowId=$_GET['slide_id'];
             $deleteId=$_GET['slides_id'];
-            $this->getDbContent();
-            $output = '';
+            $warningMessage = '';
             if (Tools::isSubmit('submit' . $this->name)) {
                 $configValue = (string) Tools::getValue('block-title');
                 if (empty($configValue)){
-                    $output = $this->displayError($this->l('Invalid Configuration value'));
+                    $warningMessage.= $this->displayError($this->l('Invalid Configuration value'));
                 } else {
                     Configuration::updateValue('update_value', $configValue);
-                    $output = $this->displayConfirmation($this->l('Settings updated'));
+                    $warningMessage.= $this->displayConfirmation($this->l('Settings updated'));
                 }
             }
             if (Tools::isSubmit('insertion' . $this->name)) {
-                if (empty('slider_name')){
-                    $output = $this->displayError($this->l('Enter slider name'));
+                $slidername = (string) Tools::getValue('slider_name');
+                if (empty($slidername)){
+                    $warningMessage.= $this->displayError($this->l('Enter slider name'));
                 }
-                else{
-                    $slidername = (string) Tools::getValue('slider_name');
+                $link = (string) Tools::getValue('link');
+                if (empty($link)){
+                    $warningMessage.= $this->displayError($this->l('Enter the link'));
                 }
-                if (empty('link')){
-                    $output = $this->displayError($this->l('Enter the link'));
+                $position = (int) Tools::getValue('position');
+                if (empty($position)){
+                    $warningMessage.= $this->displayError($this->l('Enter position'));
                 }
-                else{
-                    $link = (string) Tools::getValue('link');
+                $status = (int) Tools::getValue('status');
+                if (empty($status)){
+                    $warningMessage.= $this->displayError($this->l('Enter the status'));
                 }
-                if (empty('position')){
-                    $output = $this->displayError($this->l('Enter position'));
+                $image = (string) Tools::getValue('image');
+                if (empty($image)){
+                    $warningMessage.= $this->displayError($this->l('Attach image file'));
                 }
-                else{
-                    $position = (int) Tools::getValue('position');
-                }
-                if (empty('status')){
-                    $output = $this->displayError($this->l('Enter the status'));
-                }
-                else{
-                    $status = (int) Tools::getValue('status');
-                }
-                if (empty('image')){
-                    $output = $this->displayError($this->l('Attach image file'));
-                }
-                else{
-                    $image = (string) Tools::getValue('image');
+                else{                 
                     $fileName=$_FILES['image']['name'];
                     $temp_file = $_FILES['image']['tmp_name'];
                     $uploadFile=$this->fileUpload($fileName, $temp_file);
@@ -97,54 +88,44 @@
                 );
                 $process = Db::getInstance()->insert('sp_banner', $insertData,false,true,Db::INSERT,false);
                 if($process){
-                    $changes = $this->displayConfirmation($this->l('Your settings have been saved'));     
+                    $changes.= $this->displayConfirmation($this->l('Your settings have been saved'));     
                 }
                 else{
-                    $output = $this->displayError($this->l('There was a problem'));
+                    $warningMessage.= $this->displayError($this->l('There was a problem'));
                 }
             }
             if($rowId){
-                $output.= $this->updateRecord($rowId);
+                $warningMessage.= $this->updateRecord($rowId);
             }
             if($deleteId){
                 $this->deleteRecord($deleteId);
             }
             if (Tools::isSubmit('updation' . $this->name)) {
-                if (empty('id')){
-                    $output = $this->displayError($this->l('Enter the ID'));
+                $id = (int) Tools::getValue('id');
+                if (empty($id)){
+                    $warningMessage.= $this->displayError($this->l('Enter the ID'));
+                }
+                $slidername = (string) Tools::getValue('slider_name');
+                if (empty($slidername)){
+                    $warningMessage.= $this->displayError($this->l('Enter Slider name'));
+                }
+                $link = (string) Tools::getValue('link');
+                if (empty($link)){
+                    $warningMessage.= $this->displayError($this->l('Enter link'));
+                }
+                $position = (int) Tools::getValue('position');
+                if (empty($position)){
+                    $warningMessage.= $this->displayError($this->l('Enter position'));
+                }
+                $status = (int) Tools::getValue('status');
+                if (empty($status)){
+                    $warningMessage.= $this->displayError($this->l('Enter status'));
+                }
+                $image = (string) Tools::getValue('images');
+                if (empty($image)){
+                    $warningMessage.= $this->displayError($this->l('Enter status'));
                 }
                 else{
-                    $id = (int) Tools::getValue('id');
-                }
-                if (empty('id')){
-                    $output = $this->displayError($this->l('Enter Slider name'));
-                }
-                else{
-                    $slidername = (string) Tools::getValue('slider_name');
-                }
-                if (empty('link')){
-                    $output = $this->displayError($this->l('Enter link'));
-                }
-                else{
-                    $link = (string) Tools::getValue('link');
-                }
-                if (empty('position')){
-                    $output = $this->displayError($this->l('Enter position'));
-                }
-                else{
-                    $position = (int) Tools::getValue('position');
-                }
-                if (empty('status')){
-                    $output = $this->displayError($this->l('Enter status'));
-                }
-                else{
-                    $status = (int) Tools::getValue('status');
-                }
-                if (empty('image')){
-                    $output = $this->displayError($this->l('Enter status'));
-                }
-                else{
-                    $image = (string) Tools::getValue('images');
                     $fileName=$_FILES['images']['name'];
                     $temp_file = $_FILES['images']['tmp_name'];
                     $uploadFile=$this->fileUpload($fileName,$temp_file);
@@ -158,14 +139,14 @@
                 );
                 $action = Db::getInstance()->update('sp_banner', $updateData,"id_slide=$id",0,false,true,false);
                 if(empty($action)){
-                    $output = $this->displayError($this->l('No update query'));
+                    $warningMessage.= $this->displayError($this->l('No update query'));
                 }
                 else{
-                    $changes = $this->displayConfirmation($this->l('Your settings have been saved'));     
+                    $changes.= $this->displayConfirmation($this->l('Your settings have been saved'));     
                 }
                 
             }
-            return $output . $changes . $this->displayForm() . $this->displayInsertForm() . $this->viewDb();            
+            return $warningMessage . $changes . $this->displayForm() . $this->displayInsertForm() . $this->viewDb();                       
         }
 
         public function getDbContent(){
@@ -215,10 +196,10 @@
 
             $image_path = dirname(__DIR__) . "\sp_banner\images\\" . $fileName;
             if (move_uploaded_file($temp_file, $image_path)) {
-                $output = $this->displayConfirmation($this->l(' File uploaded successfully'));
+                $warningMessage.= $this->displayConfirmation($this->l(' File uploaded successfully'));
                 return $fileName;
             } else {
-                $output = $this->displayError($this->l('Error in uploading file'));
+                $warningMessage.= $this->displayError($this->l('Error in uploading file'));
             }
         }
 

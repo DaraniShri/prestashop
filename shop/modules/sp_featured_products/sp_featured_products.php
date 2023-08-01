@@ -19,7 +19,6 @@ class Sp_Featured_Products extends Module
         $this->displayName = $this->l('Featured Products');
         $this->description = $this->l('Featured Products of the store.');
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
-        $this->registerHook('displayHeader');
     }
 
     /**
@@ -116,10 +115,7 @@ class Sp_Featured_Products extends Module
     }
 
     public function getProductDetailsFromConfiguration(){
-        return $this->getProductDetails();
-        // $ProductDetailsFromConfiguration=Configuration::get("product_details");
-        // $getProductArray=json_decode($ProductDetailsFromConfiguration);
-        // return $getProductArray;
+        return $this->getProductDetails(); 
     }
 
     public function selectProduct()
