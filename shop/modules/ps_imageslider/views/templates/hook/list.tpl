@@ -22,6 +22,8 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  * International Registered Trademark & Property of PrestaShop SA
  *}
+<p class="namasthey">{$slider_tab_status}</p>
+
 <div class="panel"><h3><i class="icon-list-ul"></i> {l s='Slides list' d='Modules.Imageslider.Admin'}
 	<span class="panel-heading-action">
 		<a id="desc-product-new" class="list-toolbar-btn" href="{$link->getAdminLink('AdminModules')}&configure=ps_imageslider&addSlide=1">
@@ -61,6 +63,10 @@
 									<i class="icon-edit"></i>
 									{l s='Edit' d='Admin.Actions'}
 								</a>
+								{if !empty($slide.new_tab)}
+									{$slide.new_tab}
+									
+								{/if}	
 								<a class="btn btn-default"
 									href="{$link->getAdminLink('AdminModules')}&configure=ps_imageslider&delete_id_slide={$slide.id_slide}">
 									<i class="icon-trash"></i>

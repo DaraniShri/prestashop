@@ -64,14 +64,13 @@
                         ),
                         array(
                             'type' => 'switch',
-                            'label' => $this->getTranslator()->trans('Enable New Tab', array(), 'Admin.Global'),
+                            'label' => $this->getTranslator()->trans('Newtab Enabled', array(), 'Admin.Global'),
                             'name' => 'active_slide_feature',
                             'is_bool' => true,
                             'values' => array(
                                 array(
                                     'id' => 'active_on',
                                     'value' => 1,
-                                    'checked' => 'true',
                                     'label' => $this->getTranslator()->trans('Yes', array(), 'Admin.Global')
                                 ),
                                 array(
