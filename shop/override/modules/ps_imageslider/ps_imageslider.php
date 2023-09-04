@@ -1,5 +1,5 @@
 <?php
-    class Ps_ImageSliderOverride extends Ps_ImageSlider {
+    class Ps_ImageSliderOverride extends Ps_ImageSlider{
 
         public function renderAddForm()
         {
@@ -64,7 +64,7 @@
                         ),
                         array(
                             'type' => 'switch',
-                            'label' => $this->getTranslator()->trans('Newtab Enabled', array(), 'Admin.Global'),
+                            'label' => $this->getTranslator()->trans('Enable New Tab', array(), 'Admin.Global'),
                             'name' => 'active_slide_feature',
                             'is_bool' => true,
                             'values' => array(
@@ -139,7 +139,7 @@
             } else {
                 return $helper->generateForm(array($fields_form));
             }
-        } 
+        }
 
         public function getWidgetVariables($hookName = null, array $configuration = [])
         {
@@ -187,8 +187,8 @@
             else{
                 $fields['active_slide_feature'] = 0;
             }
+
             $fields['active_slide'] = Tools::getValue('active_slide', $slide->active);
-            
             $fields['has_picture'] = true;
 
             $languages = Language::getLanguages(false);
@@ -200,18 +200,82 @@
                 $fields['legend'][$lang['id_lang']] = Tools::getValue('legend_'.(int)$lang['id_lang'], $slide->legend[$lang['id_lang']]);
                 $fields['description'][$lang['id_lang']] = Tools::getValue('description_'.(int)$lang['id_lang'], $slide->description[$lang['id_lang']]);
             }
+
             return $fields;
         }
 
-        public function _postProcess(){
-            if (Tools::isSubmit('submitSlide')) {
-                /* Sets ID if needed */
+        protected function _postProcess()
+        {
+            $errors = array();
+            $shop_context = Shop::getContext();
+
+            /* Processes Slider */
+            if (Tools::isSubmit('submitSlider')) {
+                $shop_groups_list = array();
+                $shops = Shop::getContextListShopID();
+
+                foreach ($shops as $shop_id) {
+                    $shop_group_id = (int)Shop::getGroupFromShop($shop_id, true);
+
+                    if (!in_array($shop_group_id, $shop_groups_list)) {
+                        $shop_groups_list[] = $shop_group_id;
+                    }
+
+                    $res = Configuration::updateValue('HOMESLIDER_SPEED', (int)Tools::getValue('HOMESLIDER_SPEED'), false, $shop_group_id, $shop_id);
+                    $res &= Configuration::updateValue('HOMESLIDER_PAUSE_ON_HOVER', (int)Tools::getValue('HOMESLIDER_PAUSE_ON_HOVER'), false, $shop_group_id, $shop_id);
+                    $res &= Configuration::updateValue('HOMESLIDER_WRAP', (int)Tools::getValue('HOMESLIDER_WRAP'), false, $shop_group_id, $shop_id);
+                }
+
+                /* Update global shop context if needed*/
+                switch ($shop_context) {
+                    case Shop::CONTEXT_ALL:
+                        $res &= Configuration::updateValue('HOMESLIDER_SPEED', (int)Tools::getValue('HOMESLIDER_SPEED'));
+                        $res &= Configuration::updateValue('HOMESLIDER_PAUSE_ON_HOVER', (int)Tools::getValue('HOMESLIDER_PAUSE_ON_HOVER'));
+                        $res &= Configuration::updateValue('HOMESLIDER_WRAP', (int)Tools::getValue('HOMESLIDER_WRAP'));
+                        if (count($shop_groups_list)) {
+                            foreach ($shop_groups_list as $shop_group_id) {
+                                $res &= Configuration::updateValue('HOMESLIDER_SPEED', (int)Tools::getValue('HOMESLIDER_SPEED'), false, $shop_group_id);
+                                $res &= Configuration::updateValue('HOMESLIDER_PAUSE_ON_HOVER', (int)Tools::getValue('HOMESLIDER_PAUSE_ON_HOVER'), false, $shop_group_id);
+                                $res &= Configuration::updateValue('HOMESLIDER_WRAP', (int)Tools::getValue('HOMESLIDER_WRAP'), false, $shop_group_id);
+                            }
+                        }
+                        break;
+                    case Shop::CONTEXT_GROUP:
+                        if (count($shop_groups_list)) {
+                            foreach ($shop_groups_list as $shop_group_id) {
+                                $res &= Configuration::updateValue('HOMESLIDER_SPEED', (int)Tools::getValue('HOMESLIDER_SPEED'), false, $shop_group_id);
+                                $res &= Configuration::updateValue('HOMESLIDER_PAUSE_ON_HOVER', (int)Tools::getValue('HOMESLIDER_PAUSE_ON_HOVER'), false, $shop_group_id);
+                                $res &= Configuration::updateValue('HOMESLIDER_WRAP', (int)Tools::getValue('HOMESLIDER_WRAP'), false, $shop_group_id);
+                            }
+                        }
+                        break;
+                }
+
+                $this->clearCache();
+
+                if (!$res) {
+                    $errors[] = $this->displayError($this->getTranslator()->trans('The configuration could not be updated.', array(), 'Modules.Imageslider.Admin'));
+                } else {
+                    Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true) . '&conf=6&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name);
+                }
+            } elseif (Tools::isSubmit('changeStatus') && Tools::isSubmit('id_slide')) {
+                $slide = new Ps_HomeSlide((int)Tools::getValue('id_slide'));
+                if ($slide->active == 0) {
+                    $slide->active = 1;
+                } else {
+                    $slide->active = 0;
+                }
+                $res = $slide->update();
+                $this->clearCache();
+                $this->_html .= ($res ? $this->displayConfirmation($this->getTranslator()->trans('Configuration updated', array(), 'Admin.Notifications.Success')) : $this->displayError($this->getTranslator()->trans('The configuration could not be updated.', array(), 'Modules.Imageslider.Admin')));
+            } elseif (Tools::isSubmit('submitSlide')) {
                 if(Tools::getValue('active_slide_feature')==1){
                     $this->storeConfiguration(Tools::getValue('id_slide'));
                 }
-                if(Tools::getValue('active_slide_feature')==0){
+                else{
                     $this->removeConfiguration(Tools::getValue('id_slide'));
                 }
+                /* Sets ID if needed */
                 if (Tools::getValue('id_slide')) {
                     $slide = new Ps_HomeSlide((int)Tools::getValue('id_slide'));
                     if (!Validate::isLoadedObject($slide)) {
@@ -282,6 +346,24 @@
                     }
                     $this->clearCache();
                 }
+            } elseif (Tools::isSubmit('delete_id_slide')) {
+                $slide = new Ps_HomeSlide((int)Tools::getValue('delete_id_slide'));
+                $res = $slide->delete();
+                $this->clearCache();
+                if (!$res) {
+                    $this->_html .= $this->displayError('Could not delete.');
+                } else {
+                    Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true) . '&conf=1&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name);
+                }
+            }
+
+            /* Display errors if needed */
+            if (count($errors)) {
+                $this->_html .= $this->displayError(implode('<br />', $errors));
+            } elseif (Tools::isSubmit('submitSlide') && Tools::getValue('id_slide')) {
+                Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true) . '&conf=4&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name);
+            } elseif (Tools::isSubmit('submitSlide')) {
+                Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true) . '&conf=3&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name);
             }
         }
 
