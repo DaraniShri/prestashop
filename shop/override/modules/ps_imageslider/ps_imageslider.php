@@ -140,38 +140,78 @@
                 return $helper->generateForm(array($fields_form));
             }
         } 
-        
-        public function renderList()
+
+        public function getWidgetVariables($hookName = null, array $configuration = [])
         {
-            $slides = $this->getSlides();
-            foreach ($slides as $key => $slide) {            
-                $slides[$key]['status'] = $this->displayStatus($slide['id_slide'], $slide['active']);
-                $associated_shop_ids = Ps_HomeSlide::getAssociatedIdsShop((int)$slide['id_slide']);
-                if ($associated_shop_ids && count($associated_shop_ids) > 1) {
-                    $slides[$key]['is_shared'] = true;
-                } else {
-                    $slides[$key]['is_shared'] = false;
+            $slides = $this->getSlides(true);
+            if (is_array($slides)) {
+                foreach ($slides as &$slide) {
+                    $slide['sizes'] = @getimagesize((__DIR__ . DIRECTORY_SEPARATOR . 'images' . DIRECTORY_SEPARATOR . $slide['image']));
+                    if (isset($slide['sizes'][3]) && $slide['sizes'][3]) {
+                        $slide['size'] = $slide['sizes'][3];
+                    }
                 }
-                $slides[$key]['new_tab']=Configuration::get('open_new_tab_'.$slide['id_slide']);
             }
 
-            $this->context->smarty->assign(
-                array(
-                    'link' => $this->context->link,
-                    'slides' => $slides,
-                    'image_baseurl' => $this->_path.'images/',
-                    )
-            );
+            $config = $this->getConfigFieldsValues();
+            $new_tab_slider=Configuration::get('new_tab_imageslider');
+            $newtab_slide_id=explode(',',$new_tab_slider);
 
-            return $this->display(__FILE__, 'list.tpl');
+            return [
+                'homeslider' => [
+                    'speed' => $config['HOMESLIDER_SPEED'],
+                    'pause' => $config['HOMESLIDER_PAUSE_ON_HOVER'] ? 'hover' : '',
+                    'wrap' => $config['HOMESLIDER_WRAP'] ? 'true' : 'false',
+                    'slides' => $slides,
+                ],
+                'newtabslideid' => $newtab_slide_id,
+            ];
+        }
+
+        public function getAddFieldsValues()
+        {
+            $fields = array();
+
+            if (Tools::isSubmit('id_slide') && $this->slideExists((int)Tools::getValue('id_slide'))) {
+                $slide = new Ps_HomeSlide((int)Tools::getValue('id_slide'));
+                $fields['id_slide'] = (int)Tools::getValue('id_slide', $slide->id);
+            } else {
+                $slide = new Ps_HomeSlide();
+            }
+            $ids=Tools::getValue('id_slide');
+            $sliderId=Configuration::get('new_tab_imageslider');
+            $sliderIdNewTab=explode(',',$sliderId);
+            if(in_array($ids,$sliderIdNewTab)){
+                $fields['active_slide_feature'] = 1;
+            }
+            else{
+                $fields['active_slide_feature'] = 0;
+            }
+            $fields['active_slide'] = Tools::getValue('active_slide', $slide->active);
+            
+            $fields['has_picture'] = true;
+
+            $languages = Language::getLanguages(false);
+
+            foreach ($languages as $lang) {
+                $fields['image'][$lang['id_lang']] = Tools::getValue('image_'.(int)$lang['id_lang']);
+                $fields['title'][$lang['id_lang']] = Tools::getValue('title_'.(int)$lang['id_lang'], $slide->title[$lang['id_lang']]);
+                $fields['url'][$lang['id_lang']] = Tools::getValue('url_'.(int)$lang['id_lang'], $slide->url[$lang['id_lang']]);
+                $fields['legend'][$lang['id_lang']] = Tools::getValue('legend_'.(int)$lang['id_lang'], $slide->legend[$lang['id_lang']]);
+                $fields['description'][$lang['id_lang']] = Tools::getValue('description_'.(int)$lang['id_lang'], $slide->description[$lang['id_lang']]);
+            }
+            return $fields;
         }
 
         public function _postProcess(){
             if (Tools::isSubmit('submitSlide')) {
                 /* Sets ID if needed */
-                $sliderId = (int) Tools::getValue('id_slide');
-                $sliderTabValue = (int) Tools::getValue('active_slide_feature');
-                Configuration::updateValue('open_new_tab_'.$sliderId, $sliderTabValue);
+                if(Tools::getValue('active_slide_feature')==1){
+                    $this->storeConfiguration(Tools::getValue('id_slide'));
+                }
+                if(Tools::getValue('active_slide_feature')==0){
+                    $this->removeConfiguration(Tools::getValue('id_slide'));
+                }
                 if (Tools::getValue('id_slide')) {
                     $slide = new Ps_HomeSlide((int)Tools::getValue('id_slide'));
                     if (!Validate::isLoadedObject($slide)) {
@@ -242,6 +282,27 @@
                     }
                     $this->clearCache();
                 }
+            }
+        }
+
+        public function storeConfiguration($id){
+            $slider = Configuration::get('new_tab_imageslider');
+            $slider_array = explode(',',$slider);
+            if(!in_array($id,$slider_array)){
+                array_push($slider_array,$id);
+            }
+            $slider_id_string= implode(',',$slider_array);
+            Configuration::updateValue('new_tab_imageslider',$slider_id_string);                                 
+        }
+
+        public function removeConfiguration($id){
+            $slider = Configuration::get('new_tab_imageslider');
+            $slider_array = explode(',',$slider);
+            if(in_array($id,$slider_array)){
+                $index=array_search($id,$slider_array);
+                unset($slider_array[$index]);
+                $slider_id_string= implode(',',$slider_array);
+                Configuration::updateValue('new_tab_imageslider',$slider_id_string);                                 
             }
         }
     }
