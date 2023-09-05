@@ -132,5 +132,17 @@
             $result=$db->executeS($request);
             return $result;
         }
+
+        public function stockUpdate(){
+            $db = \Db::getInstance();
+            $sql = "SELECT p.id_product, sa.quantity
+                    FROM "._DB_PREFIX_."product p LEFT JOIN "._DB_PREFIX_."stock_available sa
+                    ON (p.id_product=sa.id_product) 
+                    WHERE sa.id_shop=1 AND sa.quantity<=10";
+            $result=$db->executeS($sql);
+            foreach($result as $product){
+                StockAvailable::setQuantity((int) $product['id_product'],0,0);
+            }
+        }       
     }
 ?>
