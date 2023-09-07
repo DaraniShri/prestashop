@@ -3,7 +3,9 @@
 
     use PhpOffice\PhpSpreadsheet\Spreadsheet; 
     use PhpOffice\PhpSpreadsheet\Writer\Csv;
-    use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn; 
+    use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
+    use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+    use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 
     if (!defined('_PS_VERSION_')) {
         exit;
@@ -23,7 +25,8 @@
             $this -> displayName  =  $this -> l('Export Products');
             $this -> description  =  $this -> l('Admin Products');
             $this -> confirmUninstall  =  $this -> l('Are you sure you want to uninstall?');
-            $this -> registerHook('actionOrderGridDefinitionModifier');
+            
+            $this -> registerHook('actionOrderGridQueryBuilderModifier');
         }
 
         /**
@@ -34,6 +37,8 @@
             return (
                     parent::install()
                     && $this -> registerHook('displayHome')
+                    && $this -> registerHook('actionOrderGridDefinitionModifier')
+
                 ); 
         }
 
@@ -147,54 +152,69 @@
             }
         }       
 
-        // public function hookActionOrderGridDefinitionModifier(array $params){
-        //     $definition = $params['definition'];
-        //     $filters = $definition->getFilters();
-        //     $columns = $definition->getColumns();
-        //     $columns
-        //         ->addAfter('country_name',
-        //             (new DataColumn('carrier'))
-        //                 ->setName($this->trans('Carrier', array(), 'Admin.Global'))
-        //                 ->setOptions([
-        //                     'field' => 'carriername',
-        //                 ])
-        //         );
-        // }
+        public function getCarrierChoicesForFilter(){
+            $db = \Db::getInstance();
+            $sql = "SELECT DISTINCT ps_carrier.name, ps_orders.id_carrier
+                    FROM ps_orders LEFT JOIN ps_carrier
+                    ON ps_orders.id_carrier = ps_carrier.id_carrier";
+            $result = $db -> executeS($sql);
+            return $result;
+        }
 
-        public function hookActionOrderGridDefinitionModifier(array $params)
-        {
-            if (empty($params['definition'])) {
-                return;
-            }
-
+        public function hookActionOrderGridDefinitionModifier(array $params){
             $definition = $params['definition'];
-
-            $column = new PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn('carrier_reference');
-            $column->setName($this->l('Carrier'));
-            $column->setOptions([
+            $column = new DataColumn('carrier_reference');
+            $column -> setName($this->l('Carrier'));
+            $column -> setOptions([
                 'field' => 'carrier_name',
-            ]);
-            
+            ]);            
+            $definition -> getColumns() -> addAfter('payment',$column);
+            $choices = $this -> getCarrierChoicesForFilter();
+            $filterChoice = [];
+            foreach($choices as $choice){
+                $filterChoice[$choice['name']]=$choice['id_carrier'];
+            }
+                $definition -> getFilters() -> add(
+                    (new Filter('carrier_reference', ChoiceType::class))
+                        -> setAssociatedColumn('carrier_reference')
+                        -> setTypeOptions([
+                            'required' => false,
+                            'choices' => $filterChoice,
+                        ])
+                );           
+        }
 
-            $definition
-                ->getColumns()
-                ->addAfter(
-                    'payment',
-                    $column
-                )
-            ;
+        public function getCarrierDetails(){
+            $db = \Db::getInstance();
+            $sql = "SELECT ps_orders.id_carrier, ps_carrier.name
+                    FROM ps_orders LEFT JOIN ps_carrier
+                    ON ps_orders.id_carrier = ps_carrier.id_carrier";
+            $result = $db -> executeS($sql);
+            return $result;
+        }
 
-            $carrierByReferenceChoiceProvider = $this->get('prestashop.core.form.choice_provider.carrier_by_reference_id');
-
-            $definition->getFilters()->add(
-                (new PrestaShop\PrestaShop\Core\Grid\Filter\Filter('carrier_reference', Symfony\Component\Form\Extension\Core\Type\ChoiceType::class))
-                    ->setAssociatedColumn('carrier_reference')
-                    ->setTypeOptions([
-                        'required' => false,
-                        'choices' => $carrierByReferenceChoiceProvider->getChoices(),
-                        'translation_domain' => false,
-                    ])
+        public function hookActionOrderGridQueryBuilderModifier(array $params)
+        {
+            $searchQueryBuilder = $params['search_query_builder'];
+            $searchCriteria = $params['search_criteria'];
+            $searchQueryBuilder->addSelect(
+                'o.`id_carrier`, ps_carrier.`id_reference` AS `carrier_reference`, ps_carrier.`name` AS `carrier_name`'
             );
+            $searchQueryBuilder->leftJoin(
+                'o',
+                '`' . _DB_PREFIX_ . 'carrier`',
+                'ps_carrier',
+                'ps_carrier.`id_carrier` = o.`id_carrier`'
+            );
+            if ('carrier_reference' === $searchCriteria->getOrderBy()) {
+                $searchQueryBuilder->orderBy('ps_carrier.id_reference', $searchCriteria->getOrderWay());
+            }
+            foreach ($searchCriteria->getFilters() as $filterName => $filterValue) {
+                if ('carrier_reference' === $filterName) {
+                    $searchQueryBuilder->andWhere('ps_carrier.id_reference = :carrier_reference');
+                    $searchQueryBuilder->setParameter('carrier_reference', $filterValue);
+                }
+            }
         }
     }
 ?>
