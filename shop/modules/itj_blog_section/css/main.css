@@ -1,0 +1,90 @@
+#module_form #render-tab hr{
+    margin: 0;
+}
+
+#module_form #render-tab #capitoolsBlockTabsContent{
+    padding: 30px 0;
+}
+
+#module_form #render-tab #capitoolsBlockTabsContent .row{
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+#module_form #render-tab #capitoolsBlockTabsContent .form-wrapper .row .label{
+    width: 280px;
+    margin-right: 25px;
+} 
+
+#module_form #render-tab #capitoolsBlockTabsContent .form-wrapper .row .label label{
+    color: #000;
+}
+#module_form #render-tab #capitoolsBlockTabsContent .form-wrapper .row .field{
+    width: 100%;
+}
+#module_form #render-tab #capitoolsBlockTabsContent .form-wrapper .row .field input{
+    height: 40px;
+}
+#module_form #render-tab #capitoolsBlockTabsContent .form-wrapper .row .field .select2,
+#module_form #render-tab #capitoolsBlockTabsContent .form-wrapper .row .field select{
+    padding: 0!important;
+    height: auto!important;
+}
+#module_form #render-tab #capitoolsBlockTabsContent .form-wrapper .row .field select,
+#module_form #render-tab #capitoolsBlockTabsContent .form-wrapper .row .field .select2,
+#module_form #render-tab #capitoolsBlockTabsContent .form-wrapper .row .field input{
+    width: 100%!important;
+    padding: 5px 10px;
+    height: 40px;
+}
+
+#capitoolsBlockProducts .product_list button.slick-next{
+    right: 0;
+}
+
+#capitoolsBlockProducts .product_list button.slick-next:before {
+    transform: rotate(45deg);
+    right: 7px;
+}
+
+#capitoolsBlockProducts .product_list button:hover,
+#capitoolsBlockProducts .product_list button:focus{
+    outline: none;
+}
+
+#capitoolsBlockProducts .product_list{
+    display: flex;
+    align-items: center;
+}
+
+#capitoolsBlockProducts .product_list button img{
+    display: none;
+}
+
+#capitoolsBlockProducts .product_list button {
+    padding: 0;
+    position: absolute;
+    z-index: 9;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%!important;
+    border: 1px solid #DCE0E0;
+    box-shadow: none;
+}
+
+#capitoolsBlockProducts .product_list button:before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    display: block;
+    border: 3px solid #000;
+    border-bottom: 0;
+    border-left: 0;
+    margin: 0 auto;
+    transform: rotate(-135deg);
+    position: absolute;
+    right: 0;
+    left: 0;
+    top: 13px;
+}
