@@ -208,6 +208,8 @@ class Export_Order extends ObjectModel{
         $state = new State ($address -> id_state);
         $country = new Country ($address -> id_country);
         $carrier = new Carrier ($order -> id_carrier);
+        $product_details = $order -> getProductsDetail();
+        var_dump($address);
         $carrier_code = $carrier -> id_reference;
         $carrier_name = $carrier -> name;
         $carrier_delay = $carrier -> delay;
@@ -221,7 +223,7 @@ class Export_Order extends ObjectModel{
         $postcode = $address -> postcode;
         $customerphone = $address -> phone;
         $phonemobile = $address -> phone_mobile;
-        $countrycode = $country -> iso_code;
+        $countrycode = $country -> name[1];
         $stateDetails = $state->name.' - '. $state->iso_code;
         $export_order -> order_number = $order;
         $export_order -> customer_businessname = $customercompany;
@@ -234,8 +236,17 @@ class Export_Order extends ObjectModel{
         $export_order -> customer_phone = $customerphone;
         $export_order -> mobile_customers = $phonemobile;
         $export_order -> customer_email = $customermail;
+        $export_order -> carrier_code = $carrier_code;
+        $export_order -> carrier_name = $carrier_name;
+        foreach($product_details as $product_detail){
+            $product_code = $product_detail['id_product'];
+            $product_name = $product_detail['product_name'];
+            $export_order -> item_code = $product_code;
+            $export_order -> item_description = $product_name;
+        }
         $export_order -> add();
         $export_order -> add(true, false);
+        
     }
 }
 
