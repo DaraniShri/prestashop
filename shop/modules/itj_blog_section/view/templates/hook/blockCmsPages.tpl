@@ -5,12 +5,12 @@
         </h2>
         <div class="blog-block-content d-flex">  
             <div class="blog-content">                 
-                <div class="section-details">                 
-                    {foreach from=$blocks key=index item=block} 
+                <div class="section-details" id="cms-block-details"> 
+                    {* {foreach from=$blocks key=index item=block} 
                         {if $block.meta_title}                        
                             {include file="./blockCms.tpl" block=$block index=$index} 
                         {/if} 
-                    {/foreach} 
+                    {/foreach}  *}
                 </div> 
             </div> 
         </div>   

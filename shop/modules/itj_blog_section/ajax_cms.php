@@ -1,20 +1,17 @@
 <?php
     include_once('../../config/config.inc.php');
     include_once('../../init.php');
-    
-    $db = \Db::getInstance();
-    $query = "SELECT id_cms, meta_title FROM ps_cms_lang WHERE id_lang = 1 AND id_shop = 1 AND id_cms > 5";
-    $result=$db->executeS($query);
-    foreach($result as $val){
-        $cms = new CMS($val['id_cms']);
-        $link = new Link();
-        $url = $link->getCMSLink($cms);
-        $response = array(
-            'name' => $val['meta_title'],
-            'url' => $url,
-        );
-        if(!empty($response)){
-            echo json_encode($response);
-        }
+
+    $cms = new CMS();
+    $link = new Link();
+    $pages = $cms->getCMSPages(Context::getContext()->language->id , 3, true, 1);
+    $cms_page = [];
+    foreach($pages as $page){
+        $page['page_link'] = $link->getCMSLink($page['id_cms']);
+        $cms_page[] = $page;
     }
+    $smarty = new Smarty();
+    $smarty->assign('cms_page', $cms_page);
+    $response = $smarty->fetch(_PS_MODULE_DIR_.'itj_blog_section/view/templates/hook/customBlockCmsPages.tpl');
+    echo $response;
 ?>
