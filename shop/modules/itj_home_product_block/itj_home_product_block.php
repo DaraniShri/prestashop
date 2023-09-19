@@ -24,7 +24,6 @@ class itj_Home_Product_Block extends Module {
 
         $this->displayName = $this->l('Featured products on the homepage');
         $this->description = $this->l('Displays featured products in the central column of your homepage.');
-        $this->registerHook('displayHeader');
     }
 
     public function install() {
@@ -43,11 +42,8 @@ class itj_Home_Product_Block extends Module {
     public function hookDisplayHeader($params) {
         if($this->context->controller->php_self=="index"){
             $this->context->controller->addCSS(($this->_path) . 'css/itJonctionblockproducts.css', 'all');
-            $this->context->controller->addCSS(($this->_path) . 'css/slick.css', 'all');
             $this->context->controller->addJS(($this->_path) . 'js/itJonctionblockproducts.front.js', 'all');   
             $this->context->controller->addJS(($this->_path) . 'js/ajaxHomeProduct.js', 'all');     
-            $this->context->controller->addJS(($this->_path) . 'js/slick.min.js', 'all');     
-
         }    
     }
 
