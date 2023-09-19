@@ -138,3 +138,19 @@
 
   </div>
 </div>
+<script type="text/javascript">
+    _kkstrack = {
+    merchantInfo: [{ country:'fr', merchantId:'100556320' }],
+      orderValue: '{$sales}',
+      orderId: '{$orderid}',
+      basket: {$products_json nofilter}
+    };
+    (function() {
+      var s = document.createElement('script');
+      s.type = 'text/javascript';
+      s.async = true;
+      s.src = 'https://s.kk-resources.com/ks.js';
+      var x = document.getElementsByTagName('script')[0];
+      x.parentNode.insertBefore(s, x);
+    })();
+</script>
