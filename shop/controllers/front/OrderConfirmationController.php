@@ -92,12 +92,12 @@ class OrderConfirmationControllerCore extends FrontController
 
         parent::initContent();
 
-        $this->context->smarty->assign([
+        $this->context->smarty->assign(array(
             'HOOK_ORDER_CONFIRMATION' => $this->displayOrderConfirmation($order),
             'HOOK_PAYMENT_RETURN' => $this->displayPaymentReturn($order),
             'order' => $presentedOrder,
             'register_form' => $register_form,
-        ]);
+        ));
 
         if ($this->context->customer->is_guest) {
             /* If guest we clear the cookie for security reason */

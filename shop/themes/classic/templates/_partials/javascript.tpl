@@ -39,3 +39,5 @@
     {/foreach}
   </script>
 {/if}
+
+<script async="true" type="text/javascript" src="https://s.kk-resources.com/leadtag.js" ></script>
