@@ -6,6 +6,9 @@ ITJL.core = function () {
             jQuery(document).ready(self.ready);
         },
         ready: function () {
+            self.getSlickDetails()                
+        },
+        getSlickDetails: function() {
             $('.section-details').slick({
                 slidesToShow: 4,
                 slidesToScroll: 1,
@@ -32,7 +35,7 @@ ITJL.core = function () {
                     },
                 ]
             });
-        },
+        }
     };
     return self;
 }();
