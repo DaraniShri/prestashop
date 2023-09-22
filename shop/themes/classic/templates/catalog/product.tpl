@@ -79,7 +79,7 @@
           {block name='product_prices'}
             {include file='catalog/_partials/product-prices.tpl'}
           {/block}
-
+          
           <div class="product-information">
             {block name='product_description_short'}
               <div id="product-description-short-{$product.id}" class="product-description">{$product.description_short nofilter}</div>
@@ -243,6 +243,8 @@
     {block name='product_footer'}
       {hook h='displayFooterProduct' product=$product category=$category}
     {/block}
+
+    {hook h='displayFooterProductAfter'}
 
     {block name='product_images_modal'}
       {include file='catalog/_partials/product-images-modal.tpl'}

@@ -1,3 +1,4 @@
+{if !empty($products)}
 <section class="cross-sells">
     <div class="container">
         <h2 class="section-title ">Products bought together</h2>
@@ -11,7 +12,7 @@
                                     <a href="{$product['url']}"><img src="{$product['image']}" alt="" width="250" height="250" /></a>
                                     <a href="{$product['url']}"><h3>{$product['name']}</h3></a>
                                     <p class="section-description">{$product['description']|strip_tags:'UTF-8'|truncate:360:'...'}</p>
-                                    <h5>₹{$product['price']}</h5>                                    
+                                    <h5>{$product['price']}</h5>                                    
                                 </div>
                             </div>
                         </div>
@@ -21,3 +22,4 @@
         </div>
     </div>
 </section>
+{/if}

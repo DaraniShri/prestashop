@@ -16,7 +16,7 @@ class Itj_Cross_Selling extends Module {
 
         $this->displayName = $this->l('Cross-selling');
         $this->description = $this->l('Displays cross selling products for product page.');
-        
+        // $this ->registerHook('displayFooterProductAfter');
     }
 
     /**
@@ -39,14 +39,19 @@ class Itj_Cross_Selling extends Module {
     public function uninstall()
     {
         return parent::uninstall();
-    }  
+    } 
+    
+    public function hookDisplayFooterProductAfter(){
+        die("scisjdnvjinv");
+    }
 
-    /**
-     * Summary of hookDisplayFooterProduct
-     * @return string
-     */
-    public function hookDisplayFooterProduct(){ 
-        $products = $this -> getOrderProducts(Tools::getValue('id_product'));
+    public function getContent(){
+
+    }
+
+    
+    public function hookDisplayFooterProduct($params){ 
+        $products = $this -> getOrderProductsWithoutCurrentProduct($params['product']->id);
         $this -> context -> smarty -> assign(
             [
                 'products' => $products,
@@ -55,8 +60,8 @@ class Itj_Cross_Selling extends Module {
         return $this -> display(__FILE__, 'view/templates/hook/itj_cross_selling.tpl'); 
     }
 
-    public function hookDisplayCartModalFooter(){ 
-        $products = $this -> getOrderProducts(Tools::getValue('id_product'));
+    public function hookDisplayCartModalFooter($params){ 
+        $products = $this -> getOrderProductsWithoutCurrentProduct($params['product']->id);
         $this -> context -> smarty -> assign(
             [
                 'products' => $products,
@@ -65,37 +70,27 @@ class Itj_Cross_Selling extends Module {
         return $this -> display(__FILE__, 'view/templates/hook/itj_cross_selling.tpl'); 
     }
 
-    /**
-     * Summary of hookDisplayHeader
-     * @return void
-     */
     public function hookDisplayHeader(){
         $this->context->controller->addCSS(($this->_path) . 'css/slick.css', 'all');
         $this->context->controller->addJS(($this->_path).'js/slick.min.js'); 
         $this->context->controller->addJS(($this->_path).'js/itj_cross_selling.js');            
     }
 
-    /**
-     * Summary of getOrderProducts
-     * @param mixed $id
-     * @return array
-     */
-    public function getOrderProducts($id){
-        $product_query = "SELECT DISTINCT product_id
+    public function getOrderProductsWithoutCurrentProduct($id){
+        $product_query = "SELECT DISTINCT product_id, unit_price_tax_incl
                           FROM ". _DB_PREFIX_ ."order_detail
                           WHERE product_id !=". $id ." AND id_order IN (
                                             SELECT id_order 
                                             FROM ". _DB_PREFIX_ ."order_detail 
                                             WHERE product_id = $id
-                        )";
+                                        )";
         $results = Db::getInstance() -> executeS($product_query);
         $lang_id = (int) Configuration::get('PS_LANG_DEFAULT');
+        $link = new Link();
         $productDetails=[];
         foreach($results as $result){
             $product_id = $result['product_id'];
             $product = new Product($product_id, false, $lang_id);
-            $link = new Link();
-            $url = $link->getProductLink($product);
             $productImages = $product->getImages((int) $lang_id);
             if ($productImages && count($productImages) > 0) {
                 $link = new Link;
@@ -104,16 +99,12 @@ class Itj_Cross_Selling extends Module {
                     $imagePath = "http://" . $link->getImageLink($product->link_rewrite[Context::getContext()->language->id], $id_image, 'home_default');
                 }
             }
-            $product_name = $product -> name;
-            $product_price = $product -> price;
-            $product_description = $product -> description_short;
-
             $productDetails[] = [
-                "name" => $product_name,
-                "price" => $product_price,
+                "name" => $product -> name,
+                "price" => $result['unit_price_tax_incl'],
                 "image" =>$imagePath,
-                "description" => $product_description,
-                "url" => $url,
+                "description" => $product -> description_short,
+                "url" => $link->getProductLink($product),
             ];
         }
         return $productDetails;
