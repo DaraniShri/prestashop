@@ -45,24 +45,30 @@ class Itj_Blog_Section extends Module {
     }
 
     public function hookDisplayHome($params) {
-        
-        //if(isset($params['display'])){           
-            // $options=[];
-            // foreach (Language::getLanguages() as $lang) {
-            //     $options[] = [
-            //         'id_option' => $lang['id_lang'],
-            //         'name' => $lang['name'],
-            //         'iso_code' => $lang['iso_code']
-            //     ];
-            // }
-            // $blocks = $this->getFullBlock($options);
-        $blocks = $this->getCMSPageBlock();
-        $this->smarty->assign(
-                array(
-                    'blocks' => array_reverse($blocks)
-                )
-        );
+        // $blocks = $this->getCMSPageBlock();
+        // $this->smarty->assign(
+        //         array(
+        //             'blocks' => array_reverse($blocks)
+        //         )
+        // );
         return $this->display(__FILE__, 'view/templates/hook/blockCmsPages.tpl');
+    }
+
+    public function getTemplate(){
+        $cms = new CMS();
+        $link = new Link();
+        $pages = $cms->getCMSPages(Context::getContext()->language->id , 3, true, 1);
+        $cms_page = [];
+        foreach($pages as $page){
+            $page['page_link'] = $link->getCMSLink($page['id_cms']);
+            $cms_page[] = $page;
+        }
+        $this -> smarty->assign(
+            array(
+                'cms_page', $cms_page
+            )
+        );
+        return $this -> smarty -> fetch(_PS_MODULE_DIR_.'itj_blog_section/view/templates/hook/customBlockCmsPages.tpl');
     }
 
     public function getBlock($number,$option,$get_product_title = false) { 
