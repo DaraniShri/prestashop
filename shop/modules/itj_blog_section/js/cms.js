@@ -6,8 +6,9 @@ ITJL.core = function () {
             jQuery(document).ready(self.ready);
         },
         ready: function () {
+            var origin = pres
             $.ajax({
-                url: '/shop/modules/itj_blog_section/ajax_cms.php',
+                url: origin+'/modules/itj_blog_section/ajax_cms.php',
                 type : 'POST',
                 data : {
                     ajax: true,
