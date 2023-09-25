@@ -45,12 +45,6 @@ class Itj_Blog_Section extends Module {
     }
 
     public function hookDisplayHome($params) {
-        // $blocks = $this->getCMSPageBlock();
-        // $this->smarty->assign(
-        //         array(
-        //             'blocks' => array_reverse($blocks)
-        //         )
-        // );
         return $this->display(__FILE__, 'view/templates/hook/blockCmsPages.tpl');
     }
 
@@ -63,13 +57,15 @@ class Itj_Blog_Section extends Module {
             $page['page_link'] = $link->getCMSLink($page['id_cms']);
             $cms_page[] = $page;
         }
-        $this -> smarty->assign(
+
+        $this -> context -> smarty -> assign(
             array(
-                'cms_page', $cms_page
+                'cms_page' => $cms_page
             )
         );
-        return $this -> smarty -> fetch(_PS_MODULE_DIR_.'itj_blog_section/view/templates/hook/customBlockCmsPages.tpl');
+        return $this -> fetch(_PS_MODULE_DIR_.'itj_blog_section/view/templates/hook/customBlockCmsPages.tpl');
     }
+
 
     public function getBlock($number,$option,$get_product_title = false) { 
         return array( 
